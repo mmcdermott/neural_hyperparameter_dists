@@ -1,28 +1,25 @@
 !_TAG_FILE_SORTED	2	/0=unsorted, 1=sorted, 2=foldcase/
-build_mult_layer_fcr	/scratch/mmd/neural_hyperparameter_dists/neural_hyperparameter_search/distributions.py	/^def build_mult_layer_fcr(base_rv, gamma=1):$/;"	f	language:Python
+build_mult_layer_fcr	/scratch/mmd/neural_hyperparameter_dists/neural_hyperparameter_search/distributions.py	/^def build_mult_layer_fcr($/;"	f	language:Python
 CategoricalRV	/scratch/mmd/neural_hyperparameter_dists/neural_hyperparameter_dists/distributions.py	/^class CategoricalRV(MixtureDistribution):$/;"	c	language:Python
 CategoricalRV	/scratch/mmd/neural_hyperparameter_dists/neural_hyperparameter_search/distributions.py	/^class CategoricalRV(MixtureDistribution):$/;"	c	language:Python
+Censored	/scratch/mmd/neural_hyperparameter_dists/neural_hyperparameter_search/distributions.py	/^class Censored(Distribution):$/;"	c	language:Python
 DeltaDistribution	/scratch/mmd/neural_hyperparameter_dists/neural_hyperparameter_dists/distributions.py	/^class DeltaDistribution:$/;"	c	language:Python
 DeltaDistribution	/scratch/mmd/neural_hyperparameter_dists/neural_hyperparameter_search/distributions.py	/^class DeltaDistribution(Distribution):$/;"	c	language:Python
 DictDistribution	/scratch/mmd/neural_hyperparameter_dists/neural_hyperparameter_search/distributions.py	/^class DictDistribution(Distribution):$/;"	c	language:Python
 dict_fcr	/scratch/mmd/neural_hyperparameter_dists/neural_hyperparameter_search/distributions.py	/^def dict_fcr(dict_of_fns):$/;"	f	language:Python
 Distribution	/scratch/mmd/neural_hyperparameter_dists/neural_hyperparameter_search/distributions.py	/^class Distribution(ABC):$/;"	c	language:Python
 GLOBAL_RESULTS_FILENAME	/scratch/mmd/neural_hyperparameter_dists/neural_hyperparameter_search/CV_helpers.py	/^GLOBAL_RESULTS_FILENAME  = 'results.hdf'$/;"	v	language:Python
-hyperparameters	/scratch/mmd/neural_hyperparameter_dists/neural_hyperparameter_search/CV_helpers.py	/^        hyperparameters = sample(num_sample, hyperparameter_dists)$/;"	v	language:Python
 HYPERPARAMETERS_FILENAME	/scratch/mmd/neural_hyperparameter_dists/neural_hyperparameter_search/CV_helpers.py	/^HYPERPARAMETERS_FILENAME = 'hyperparameters.pkl'$/;"	v	language:Python
 LayerDistribution	/scratch/mmd/neural_hyperparameter_dists/neural_hyperparameter_dists/distributions.py	/^class LayerDistribution:$/;"	c	language:Python
 LayerDistribution	/scratch/mmd/neural_hyperparameter_dists/neural_hyperparameter_search/distributions.py	/^class LayerDistribution(Distribution):$/;"	c	language:Python
-layer_fn	/scratch/mmd/neural_hyperparameter_dists/neural_hyperparameter_search/distributions.py	/^    def layer_fn(prev, layer_num):$/;"	f	language:Python	function:build_mult_layer_fcr
+layer_fn	/scratch/mmd/neural_hyperparameter_dists/neural_hyperparameter_search/distributions.py	/^    def layer_fn(prev, layer_num):$/;"	f	language:Python
 LOCAL_RESULTS_FILENAME	/scratch/mmd/neural_hyperparameter_dists/neural_hyperparameter_search/CV_helpers.py	/^LOCAL_RESULTS_FILENAME   = 'results.pkl'$/;"	v	language:Python
-M	/scratch/mmd/neural_hyperparameter_dists/neural_hyperparameter_search/CV_helpers.py	/^            M = model_cnstr(checkpoint_dir=split_dir, **hyperparameters) # TODO(mmd): filename?$/;"	v	language:Python
 make_rvs	/scratch/mmd/neural_hyperparameter_dists/neural_hyperparameter_dists/distributions.py	/^def make_rvs(d): return {k: CategoricalRV(v) if type(v) is list else v for k, v in d.items()}$/;"	f	language:Python
-make_rvs	/scratch/mmd/neural_hyperparameter_dists/neural_hyperparameter_search/distributions.py	/^def make_rvs(d): return {k: CategoricalRV(v) if type(v) is list else v for k, v in d.items()}$/;"	f	language:Python
+make_rvs	/scratch/mmd/neural_hyperparameter_dists/neural_hyperparameter_search/distributions.py	/^def make_rvs(d): return {k: to_rv(v) for k, v in d.items()}$/;"	f	language:Python
+MarkovianGenerativeProcess	/scratch/mmd/neural_hyperparameter_dists/neural_hyperparameter_search/distributions.py	/^class MarkovianGenerativeProcess(Distribution):$/;"	c	language:Python
 MixtureDistribution	/scratch/mmd/neural_hyperparameter_dists/neural_hyperparameter_dists/distributions.py	/^class MixtureDistribution:$/;"	c	language:Python
 MixtureDistribution	/scratch/mmd/neural_hyperparameter_dists/neural_hyperparameter_search/distributions.py	/^class MixtureDistribution:$/;"	c	language:Python
-names	/scratch/mmd/neural_hyperparameter_dists/neural_hyperparameter_search/CV_helpers.py	/^        names=[PARAMS, SPLIT]))])$/;"	v	language:Python
 PARAMS	/scratch/mmd/neural_hyperparameter_dists/neural_hyperparameter_search/CV_helpers.py	/^PARAMS                   = 'Hyperparameters'$/;"	v	language:Python
-results	/scratch/mmd/neural_hyperparameter_dists/neural_hyperparameter_search/CV_helpers.py	/^            results = [M.evaluate(x) for x in dfs]$/;"	v	language:Python
-results_df	/scratch/mmd/neural_hyperparameter_dists/neural_hyperparameter_search/CV_helpers.py	/^    results_df = pd.concat([results_df, pd.DataFrame(data, index=pd.MultiIndex.from_tuples(index,$/;"	v	language:Python
 results_filepath	/scratch/mmd/neural_hyperparameter_dists/neural_hyperparameter_search/CV_helpers.py	/^    results_filepath = os.path.join(root_dir, global_results_fn)$/;"	v	language:Python
 run_CV	/scratch/mmd/neural_hyperparameter_dists/neural_hyperparameter_search/CV_helpers.py	/^def run_CV($/;"	f	language:Python
 rvs	/scratch/mmd/neural_hyperparameter_dists/neural_hyperparameter_dists/distributions.py	/^    def rvs(self, b=1, random_state=None):$/;"	m	language:Python	class:DeltaDistribution
@@ -30,29 +27,42 @@ rvs	/scratch/mmd/neural_hyperparameter_dists/neural_hyperparameter_dists/distrib
 rvs	/scratch/mmd/neural_hyperparameter_dists/neural_hyperparameter_dists/distributions.py	/^    def rvs(self, b=1, random_state=None):$/;"	m	language:Python	class:MixtureDistribution
 rvs	/scratch/mmd/neural_hyperparameter_dists/neural_hyperparameter_search/distributions.py	/^    def rvs(self, b=1, random_state=None):$/;"	m	language:Python	class:Distribution
 rvs	/scratch/mmd/neural_hyperparameter_dists/neural_hyperparameter_search/distributions.py	/^    def rvs(self, b=1, random_state=None):$/;"	m	language:Python	class:MixtureDistribution
+rv_int	/scratch/mmd/neural_hyperparameter_dists/neural_hyperparameter_search/distributions.py	/^def rv_int(rv): return TransformedRV(rv, int)$/;"	f	language:Python
 sample	/scratch/mmd/neural_hyperparameter_dists/neural_hyperparameter_search/CV_helpers.py	/^def sample(num_sample, hyperparameter_dists):$/;"	f	language:Python
 sample_dict	/scratch/mmd/neural_hyperparameter_dists/neural_hyperparameter_dists/distributions.py	/^def sample_dict(dict_of_rvs): return {k: to_numeric(v.rvs(1)) for k, v in make_rvs(dict_of_rvs).items()}$/;"	f	language:Python
 sample_dict	/scratch/mmd/neural_hyperparameter_dists/neural_hyperparameter_search/distributions.py	/^def sample_dict(dict_of_rvs): return {k: to_numeric(v.rvs(1)) for k, v in make_rvs(dict_of_rvs).items()}$/;"	f	language:Python
-setting_dir	/scratch/mmd/neural_hyperparameter_dists/neural_hyperparameter_search/CV_helpers.py	/^        setting_dir = os.path.join(root_dir, __hash_dict(hyperparameters))$/;"	v	language:Python
+SEQ_TYPES	/scratch/mmd/neural_hyperparameter_dists/neural_hyperparameter_search/distributions.py	/^SEQ_TYPES = [list, tuple, np.ndarray]$/;"	v	language:Python
 SPLIT	/scratch/mmd/neural_hyperparameter_dists/neural_hyperparameter_search/CV_helpers.py	/^SPLIT                    = 'Split Number'$/;"	v	language:Python
-split_dir	/scratch/mmd/neural_hyperparameter_dists/neural_hyperparameter_search/CV_helpers.py	/^            split_dir = os.path.join(setting_dir, 'split_%d' % split_num)$/;"	v	language:Python
+SPLIT_FN_TMPL	/scratch/mmd/neural_hyperparameter_dists/neural_hyperparameter_search/CV_helpers.py	/^SPLIT_FN_TMPL            = 'split_%d'$/;"	v	language:Python
+STATIC_TYPES	/scratch/mmd/neural_hyperparameter_dists/neural_hyperparameter_search/distributions.py	/^STATIC_TYPES = [int, float] + list(set(np.typeDict.values()))$/;"	v	language:Python
 to_numeric	/scratch/mmd/neural_hyperparameter_dists/neural_hyperparameter_dists/distributions.py	/^def to_numeric(x): return x[0] if type(x) is np.ndarray else x$/;"	f	language:Python
-to_numeric	/scratch/mmd/neural_hyperparameter_dists/neural_hyperparameter_search/distributions.py	/^def to_numeric(x): return x[0] if type(x) is np.ndarray else x$/;"	f	language:Python
+to_numeric	/scratch/mmd/neural_hyperparameter_dists/neural_hyperparameter_search/distributions.py	/^def to_numeric(x): return x[0] if type(x) in [np.ndarray, list] else x$/;"	f	language:Python
+to_rv	/scratch/mmd/neural_hyperparameter_dists/neural_hyperparameter_search/distributions.py	/^def to_rv(x):$/;"	f	language:Python
+TransformedRV	/scratch/mmd/neural_hyperparameter_dists/neural_hyperparameter_search/distributions.py	/^class TransformedRV(Distribution):$/;"	c	language:Python
+update_results_df	/scratch/mmd/neural_hyperparameter_dists/neural_hyperparameter_search/CV_helpers.py	/^    def update_results_df(old_results_df, index, data):$/;"	f	language:Python
+_next	/scratch/mmd/neural_hyperparameter_dists/neural_hyperparameter_search/distributions.py	/^    def _next(self, prev_state, n):$/;"	m	language:Python	class:MarkovianGenerativeProcess
 _sample	/scratch/mmd/neural_hyperparameter_dists/neural_hyperparameter_search/distributions.py	/^    def _sample(self): return sample_dict(self.dict_of_rvs)$/;"	m	language:Python	class:DictDistribution
+_sample	/scratch/mmd/neural_hyperparameter_dists/neural_hyperparameter_search/distributions.py	/^    def _sample(self): return self.fn(self.rv.rvs(1))$/;"	m	language:Python	class:TransformedRV
 _sample	/scratch/mmd/neural_hyperparameter_dists/neural_hyperparameter_search/distributions.py	/^    def _sample(self): return self.x$/;"	m	language:Python	class:DeltaDistribution
+_sample	/scratch/mmd/neural_hyperparameter_dists/neural_hyperparameter_search/distributions.py	/^    def _sample(self):$/;"	m	language:Python	class:Censored
 _sample	/scratch/mmd/neural_hyperparameter_dists/neural_hyperparameter_search/distributions.py	/^    def _sample(self):$/;"	m	language:Python	class:Distribution
 _sample	/scratch/mmd/neural_hyperparameter_dists/neural_hyperparameter_search/distributions.py	/^    def _sample(self):$/;"	m	language:Python	class:LayerDistribution
+_sample	/scratch/mmd/neural_hyperparameter_dists/neural_hyperparameter_search/distributions.py	/^    def _sample(self):$/;"	m	language:Python	class:MarkovianGenerativeProcess
+_stop	/scratch/mmd/neural_hyperparameter_dists/neural_hyperparameter_search/distributions.py	/^    def _stop(self, prev_state, n):$/;"	m	language:Python	class:MarkovianGenerativeProcess
 __hash_dict	/scratch/mmd/neural_hyperparameter_dists/neural_hyperparameter_search/CV_helpers.py	/^def __hash_dict(d):$/;"	f	language:Python	file:
 __init__	/scratch/mmd/neural_hyperparameter_dists/neural_hyperparameter_dists/distributions.py	/^    def __init__(self, candidate_distributions, weights=None):$/;"	m	language:Python	class:MixtureDistribution
 __init__	/scratch/mmd/neural_hyperparameter_dists/neural_hyperparameter_dists/distributions.py	/^    def __init__(self, loc=0):$/;"	m	language:Python	class:DeltaDistribution
 __init__	/scratch/mmd/neural_hyperparameter_dists/neural_hyperparameter_dists/distributions.py	/^    def __init__(self, num_layer_distribution, layer_size_distribution_fn):$/;"	m	language:Python	class:LayerDistribution
 __init__	/scratch/mmd/neural_hyperparameter_dists/neural_hyperparameter_dists/distributions.py	/^    def __init__(self, options, weights=None):$/;"	m	language:Python	class:CategoricalRV
 __init__	/scratch/mmd/neural_hyperparameter_dists/neural_hyperparameter_search/distributions.py	/^    def __init__(self):$/;"	m	language:Python	class:Distribution
+__init__	/scratch/mmd/neural_hyperparameter_dists/neural_hyperparameter_search/distributions.py	/^    def __init__(self, base_state):$/;"	m	language:Python	class:MarkovianGenerativeProcess
 __init__	/scratch/mmd/neural_hyperparameter_dists/neural_hyperparameter_search/distributions.py	/^    def __init__(self, candidate_distributions, weights=None):$/;"	m	language:Python	class:MixtureDistribution
 __init__	/scratch/mmd/neural_hyperparameter_dists/neural_hyperparameter_search/distributions.py	/^    def __init__(self, dict_of_rvs):$/;"	m	language:Python	class:DictDistribution
 __init__	/scratch/mmd/neural_hyperparameter_dists/neural_hyperparameter_search/distributions.py	/^    def __init__(self, loc=0):$/;"	m	language:Python	class:DeltaDistribution
 __init__	/scratch/mmd/neural_hyperparameter_dists/neural_hyperparameter_search/distributions.py	/^    def __init__(self, num_layer_distribution, layer_distribution_fn):$/;"	m	language:Python	class:LayerDistribution
 __init__	/scratch/mmd/neural_hyperparameter_dists/neural_hyperparameter_search/distributions.py	/^    def __init__(self, options, weights=None):$/;"	m	language:Python	class:CategoricalRV
+__init__	/scratch/mmd/neural_hyperparameter_dists/neural_hyperparameter_search/distributions.py	/^    def __init__(self, rv, fn): self.rv, self.fn = rv, fn$/;"	m	language:Python	class:TransformedRV
+__init__	/scratch/mmd/neural_hyperparameter_dists/neural_hyperparameter_search/distributions.py	/^    def __init__(self, rv, high_limit = None, low_limit = None):$/;"	m	language:Python	class:Censored
 __rv	/scratch/mmd/neural_hyperparameter_dists/neural_hyperparameter_dists/distributions.py	/^    def __rv(self, random_state):$/;"	m	language:Python	class:LayerDistribution	file:
 __sample_dict	/scratch/mmd/neural_hyperparameter_dists/neural_hyperparameter_search/CV_helpers.py	/^def __sample_dict(d): return {k: v.rvs(1) for k, v in d.items()}$/;"	f	language:Python	file:
 __seed	/scratch/mmd/neural_hyperparameter_dists/neural_hyperparameter_search/distributions.py	/^    def __seed(self, random_state):$/;"	m	language:Python	class:Distribution	file:

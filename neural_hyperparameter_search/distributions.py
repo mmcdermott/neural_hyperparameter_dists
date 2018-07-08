@@ -3,8 +3,16 @@ from abc import ABC, abstractmethod
 import random, numpy as np
 from scipy.stats import poisson, uniform, beta, geom, dlaplace, rv_discrete
 
-def to_numeric(x): return x[0] if type(x) is np.ndarray else x
-def make_rvs(d): return {k: CategoricalRV(v) if type(v) is list else v for k, v in d.items()}
+STATIC_TYPES = [int, float] + list(set(np.typeDict.values()))
+SEQ_TYPES = [list, tuple, np.ndarray]
+
+def to_numeric(x): return x[0] if type(x) in [np.ndarray, list] else x
+def to_rv(x):
+    if type(x) in STATIC_TYPES: return DeltaDistribution(x)
+    elif type(x) in SEQ_TYPES: return CategoricalRV(x)
+    elif type(x) is dict: return DictDistribution(x)
+    else: return x
+def make_rvs(d): return {k: to_rv(v) for k, v in d.items()}
 def sample_dict(dict_of_rvs): return {k: to_numeric(v.rvs(1)) for k, v in make_rvs(dict_of_rvs).items()}
 
 class Distribution(ABC):
@@ -25,6 +33,32 @@ class Distribution(ABC):
 
         num_samples = b if type(b) is int else b[0]
         return [self._sample() for _ in range(num_samples)]
+
+class MarkovianGenerativeProcess(Distribution):
+    def __init__(self, base_state):
+        """Base Generative Process class"""
+        self.prev_state = base_state
+
+    @abstractmethod
+    def _stop(self, prev_state, n):
+        raise NotImplementedError
+
+    @abstractmethod
+    def _next(self, prev_state, n):
+        raise NotImplementedError
+
+    def _sample(self):
+        generated_path = []
+        while not self._stop(self.prev_state, len(generated_path)):
+            generated_path.append(self.prev_state)
+            self.prev_state = self._next(self.prev_state, len(generated_path))
+        return generated_path
+
+class TransformedRV(Distribution):
+    def __init__(self, rv, fn): self.rv, self.fn = rv, fn
+    def _sample(self): return self.fn(self.rv.rvs(1))
+
+def rv_int(rv): return TransformedRV(rv, int)
 
 class MixtureDistribution:
     """ TODO(mmd): Can subclass Distribution?"""
@@ -63,7 +97,7 @@ class MixtureDistribution:
 
 class DictDistribution(Distribution):
     def __init__(self, dict_of_rvs):
-        self.dict_of_rvs = dict_of_rvs
+        self.dict_of_rvs = make_rvs(dict_of_rvs)
 
     def _sample(self): return sample_dict(self.dict_of_rvs)
 
@@ -76,18 +110,43 @@ def dict_fcr(dict_of_fns):
         }
     )
 
-def build_mult_layer_fcr(base_rv, gamma=1):
+class Censored(Distribution):
+    def __init__(self, rv, high_limit = None, low_limit = None):
+        self.rv, self.high_limit, self.low_limit = rv, high_limit, low_limit
+
+    def _sample(self):
+        x = self.rv.rvs(1)
+        if type(x) is list or np.ndarray: x = x[0]
+        if self.high_limit is not None and x > self.high_limit: return self.high_limit
+        if self.low_limit is not None and x < self.low_limit: return self.low_limit
+        return x
+
+def build_mult_layer_fcr(
+    base_rv, gamma=1, allow_expand=True, allow_decay=True, saturate_above=None, saturate_below=None,
+    allow_noise=True,
+):
     def layer_fn(prev, layer_num):
-        if prev is None or gamma == 1.0: return base_rv
-        return MixtureDistribution([
-            poisson(prev * gamma, loc=2),
-            poisson(prev / gamma, loc=2),
-            DeltaDistribution(loc=prev),
-            poisson(prev, loc=2),
-        ])
+        if prev is None: return base_rv
+        if type(prev) is list: prev = prev[0]
+
+        high_limit = prev if saturate_above is True else saturate_above
+        low_limit = prev if saturate_below is True else saturate_below
+        cnsr = lambda x: Censored(x, high_limit, low_limit)
+
+        if gamma == 1.0: return cnsr(base_rv)
+
+        d = lambda x: poisson(x, loc=2) if allow_noise else DeltaDistribution(loc=x)
+
+        opts = [d(prev)]
+        if allow_expand: opts.append(d(prev / gamma))
+        if allow_decay: opts.append(d(prev * gamma))
+
+        return MixtureDistribution([cnsr(x) for x in opts])
     return layer_fn
 
 class LayerDistribution(Distribution):
+    # TODO(mmd): This is not good--probably should be some kind of generative process where the process can
+    # terminate...
     def __init__(self, num_layer_distribution, layer_distribution_fn):
         self.num_layer_distribution = num_layer_distribution
         self.layer_distribution_fn = layer_distribution_fn
