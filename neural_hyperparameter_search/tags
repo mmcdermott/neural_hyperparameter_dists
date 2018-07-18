@@ -31,7 +31,7 @@ rv_int	/scratch/mmd/neural_hyperparameter_dists/neural_hyperparameter_search/dis
 sample	/scratch/mmd/neural_hyperparameter_dists/neural_hyperparameter_search/CV_helpers.py	/^def sample(num_sample, hyperparameter_dists):$/;"	f	language:Python
 sample_dict	/scratch/mmd/neural_hyperparameter_dists/neural_hyperparameter_dists/distributions.py	/^def sample_dict(dict_of_rvs): return {k: to_numeric(v.rvs(1)) for k, v in make_rvs(dict_of_rvs).items()}$/;"	f	language:Python
 sample_dict	/scratch/mmd/neural_hyperparameter_dists/neural_hyperparameter_search/distributions.py	/^def sample_dict(dict_of_rvs): return {k: to_numeric(v.rvs(1)) for k, v in make_rvs(dict_of_rvs).items()}$/;"	f	language:Python
-SEQ_TYPES	/scratch/mmd/neural_hyperparameter_dists/neural_hyperparameter_search/distributions.py	/^SEQ_TYPES = [list, tuple, np.ndarray]$/;"	v	language:Python
+SEQ_TYPES	/scratch/mmd/neural_hyperparameter_dists/neural_hyperparameter_search/distributions.py	/^SEQ_TYPES = [list, tuple, np.ndarray] # TODO(mmd): maybe remove tuple?$/;"	v	language:Python
 SPLIT	/scratch/mmd/neural_hyperparameter_dists/neural_hyperparameter_search/CV_helpers.py	/^SPLIT                    = 'Split Number'$/;"	v	language:Python
 SPLIT_FN_TMPL	/scratch/mmd/neural_hyperparameter_dists/neural_hyperparameter_search/CV_helpers.py	/^SPLIT_FN_TMPL            = 'split_%d'$/;"	v	language:Python
 STATIC_TYPES	/scratch/mmd/neural_hyperparameter_dists/neural_hyperparameter_search/distributions.py	/^STATIC_TYPES = [int, float] + list(set(np.typeDict.values()))$/;"	v	language:Python
