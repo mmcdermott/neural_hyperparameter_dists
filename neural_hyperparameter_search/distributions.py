@@ -8,7 +8,7 @@ SEQ_TYPES = [list, tuple, np.ndarray]
 
 def to_rv(x):
     if type(x) in STATIC_TYPES: return DeltaDistribution(x)
-    elif type(x) in SEQ_TYPES: return CategoricalRV(x)
+    elif type(x) in SEQ_TYPES: return MixtureDistribution(x)
     elif type(x) is dict: return DictDistribution(x)
     else: return x
 def make_rvs(d): return {k: to_rv(v) for k, v in d.items()}
@@ -62,7 +62,7 @@ def rv_int(rv): return TransformedRV(rv, int)
 class MixtureDistribution:
     """ TODO(mmd): Can subclass Distribution?"""
     def __init__(self, candidate_distributions, weights=None):
-        self.candidate_distributions = candidate_distributions
+        self.candidate_distributions = [to_rv(x) for x in candidate_distributions]
         self.num_components = len(self.candidate_distributions)
         self.ws = weights if weights is not None else [1./self.num_components] * self.num_components
         self.distribution_selection = rv_discrete(
@@ -168,6 +168,7 @@ class DeltaDistribution(Distribution):
 
     def _sample(self): return self.x
 
+# TODO(mmd): Maybe redundant
 class CategoricalRV(MixtureDistribution):
     def __init__(self, options, weights=None):
         super(CategoricalRV, self).__init__([DeltaDistribution(x) for x in options], weights=weights)
