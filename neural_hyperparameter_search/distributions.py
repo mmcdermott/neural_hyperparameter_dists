@@ -3,17 +3,16 @@ from abc import ABC, abstractmethod
 import random, numpy as np
 from scipy.stats import poisson, uniform, beta, geom, dlaplace, rv_discrete
 
-STATIC_TYPES = [int, float] + list(set(np.typeDict.values()))
+STATIC_TYPES = [bool, str, int, float] + list(set(np.typeDict.values()))
 SEQ_TYPES = [list, tuple, np.ndarray]
 
-def to_numeric(x): return x[0] if type(x) in [np.ndarray, list] else x
 def to_rv(x):
     if type(x) in STATIC_TYPES: return DeltaDistribution(x)
     elif type(x) in SEQ_TYPES: return CategoricalRV(x)
     elif type(x) is dict: return DictDistribution(x)
     else: return x
 def make_rvs(d): return {k: to_rv(v) for k, v in d.items()}
-def sample_dict(dict_of_rvs): return {k: to_numeric(v.rvs(1)) for k, v in make_rvs(dict_of_rvs).items()}
+def sample_dict(dict_of_rvs): return {k: v.rvs(1)[0] for k, v in make_rvs(dict_of_rvs).items()}
 
 class Distribution(ABC):
     def __init__(self):
@@ -92,7 +91,8 @@ class MixtureDistribution:
         samples = []
         for dist in dists:
             samples += [vals[dist].pop()]
-        return samples if b > 1 else samples[0]
+        return samples
+    # TODO(mmd): Improve
         #return samples (for layer dist)
 
 class DictDistribution(Distribution):
