@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 import random, numpy as np
 from scipy.stats import poisson, uniform, beta, geom, dlaplace, rv_discrete
 
-STATIC_TYPES = [bool, str, int, float] + list(set(np.typeDict.values()))
+STATIC_TYPES = [type(None), bool, str, int, float] + list(set(np.typeDict.values()))
 SEQ_TYPES = [list, tuple, np.ndarray]
 
 def to_rv(x):
