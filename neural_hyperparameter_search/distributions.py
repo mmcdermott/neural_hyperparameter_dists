@@ -1,16 +1,18 @@
 from abc import ABC, abstractmethod
 
 import random, numpy as np
-from scipy.stats import poisson, uniform, beta, geom, dlaplace, rv_discrete
+from scipy.stats import poisson, uniform, beta, geom, dlaplace, rv_discrete, bernoulli
 
-STATIC_TYPES = [type(None), bool, str, int, float] + list(set(np.typeDict.values()))
+STATIC_TYPES = [
+    type(None), bool, str, int, float, type(lambda:0)
+] + list(set(np.typeDict.values()))
 SEQ_TYPES = [list, tuple, np.ndarray]
 
 def to_rv(x):
-    if type(x) in STATIC_TYPES: return DeltaDistribution(x)
+    if type(x) is type(uniform(0, 1)) or isinstance(x, Distribution): return x
     elif type(x) in SEQ_TYPES: return MixtureDistribution(x)
     elif type(x) is dict: return DictDistribution(x)
-    else: return x
+    else: return DeltaDistribution(x)
 def make_rvs(d): return {k: to_rv(v) for k, v in d.items()}
 def sample_dict(dict_of_rvs): return {k: v.rvs(1)[0] for k, v in make_rvs(dict_of_rvs).items()}
 
@@ -59,8 +61,7 @@ class TransformedRV(Distribution):
 
 def rv_int(rv): return TransformedRV(rv, int)
 
-class MixtureDistribution:
-    """ TODO(mmd): Can subclass Distribution?"""
+class MixtureDistribution(Distribution):
     def __init__(self, candidate_distributions, weights=None):
         self.candidate_distributions = [to_rv(x) for x in candidate_distributions]
         self.num_components = len(self.candidate_distributions)
@@ -70,10 +71,10 @@ class MixtureDistribution:
             values=(range(self.num_components), self.ws)
         )
 
-    def rvs(self, b=1, random_state=None):
-        assert b >= 1, "Invalid b: %s" % str(b)
-
-        dists = list(self.distribution_selection.rvs(size=b, random_state=random_state))
+    def _sample(self):
+        # TODO(mmd): improve
+        b = 1
+        dists = list(self.distribution_selection.rvs(size=b))
         counts = [0] * self.num_components
         #print('Num components: ', self.num_components)
         #print('weights: ', self.ws)
@@ -83,17 +84,15 @@ class MixtureDistribution:
 
         vals = [None] * self.num_components
         for i, dist, count in zip(range(self.num_components), self.candidate_distributions, counts):
-            if count > 0: 
-                v = dist.rvs(count, random_state=random_state)
+            if count > 0:
+                v = dist.rvs(count)
                 #print(v)
                 vals[i] = [v] if type(v) in [int, np.int32, np.int64, str] else list(v)
 
         samples = []
         for dist in dists:
             samples += [vals[dist].pop()]
-        return samples
-    # TODO(mmd): Improve
-        #return samples (for layer dist)
+        return samples[0]
 
 class DictDistribution(Distribution):
     def __init__(self, dict_of_rvs):
@@ -167,6 +166,10 @@ class DeltaDistribution(Distribution):
         self.x = loc
 
     def _sample(self): return self.x
+
+class Coin(Distribution):
+    def __init__(self, prob_true=0.5): self.true_rv = bernoulli(prob_true)
+    def _sample(self): return self.true_rv.rvs(1)[0] == 1
 
 # TODO(mmd): Maybe redundant
 class CategoricalRV(MixtureDistribution):
