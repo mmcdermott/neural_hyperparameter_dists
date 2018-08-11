@@ -24,7 +24,7 @@ class TFDenseStackDistribution(MarkovianGenerativeProcess):
     ):
         self.min_depth, self.max_depth = min_depth, max_depth
         self.min_width, self.max_width = min_width, max_width
-        self.size_rv = size_rv
+        self.size_rv = to_rv(size_rv)
 
         self.dist_gen_fn = lambda size_rv: DictDistribution({
             'units':      Censored(size_rv, high_limit=self.max_width, low_limit=self.min_width),

@@ -175,3 +175,27 @@ class Coin(Distribution):
 class CategoricalRV(MixtureDistribution):
     def __init__(self, options, weights=None):
         super(CategoricalRV, self).__init__([DeltaDistribution(x) for x in options], weights=weights)
+
+class ListRV(MarkovianGenerativeProcess):
+    def __init__(
+        self,
+        el_rv,
+        stop_chance = 0.5,
+        min_len     = 1,
+        max_len     = 5,
+    ):
+        self.min_len, self.max_len = min_len, max_len
+        self.el_rv = to_rv(el_rv)
+        self.should_stop_rv = Coin(stop_chance)
+
+        first_layer = self.el_rv.rvs(1)[0]
+        super().__init__(first_layer)
+
+    def _stop(self, prev_state, n):
+        if n >= self.max_len: return True
+        if n < self.min_len: return False
+
+        return self.should_stop_rv._sample()
+
+    def _next(self, prev_state, n):
+        return self.el_rv.rvs(1)[0]
