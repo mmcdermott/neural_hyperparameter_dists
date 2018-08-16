@@ -5,8 +5,8 @@ class ParamsMetrics():
         self, accessor_metrics, fn_metrics
     ):
         self.metrics = fn_metrics
-        acc = lambda x: lambda y: y[x]
-        self.metrics.update({x: acc(x) for x in accessor_metrics})
+        acc = lambda x, d=np.NaN: lambda y: y[x] if x in y else d
+        self.metrics.update({x: acc(*x) if type(x) is tuple else acc(x) for x in accessor_metrics})
 
     def measure(self, params_list, raw_perfs_list):
         best_perf, best_idx = -float('inf'), None
@@ -19,7 +19,7 @@ class ParamsMetrics():
 
         data = {
             'best_value': [], 'avg_value': [], 'avg_std': [], 'ttest_p': [],
-            'correlation_coef': [], 'correlation_p': [],
+            'correlation_coef': [], 'correlation_p': [], 'avg_cnt': [],
         }
         metrics = []
 
@@ -31,18 +31,24 @@ class ParamsMetrics():
 
             data['best_value'].append(best)
 
-            compare_vals = [v for i, v in enumerate(vals) if not np.isnan(v) and i in valid_indices]
+            compare_vals = [vals[i] for j, i in enumerate(valid_indices) if not np.isnan(vals[i])]
+            compare_idxs = [j       for j, i in enumerate(valid_indices) if not np.isnan(vals[i])]
             compare_vals = np.array(compare_vals)
 
             # .dtype is np.dtype('bool')
 
-            c_mean, c_std = np.mean(compare_vals), np.std(compare_vals)
-            t_stat, p = ss.ttest_ind_from_stats(c_mean, c_std, len(compare_vals), best, 0, 1)
+            c_cnt = len(compare_vals)
+
+            if c_cnt > 0:
+                c_mean, c_std = np.mean(compare_vals), np.std(compare_vals)
+                t_stat, p = ss.ttest_ind_from_stats(c_mean, c_std, c_cnt, best, 0, 1)
+                corr_coef, corr_p = ss.spearmanr(compare_vals, [perfs_list[j] for j in compare_idxs])
+            else: c_mean, c_std, t_stat, p, corr_coef, corr_p = np.NaN, np.NaN, np.NaN, np.NaN, np.NaN, np.NaN
+
+            data['avg_cnt'].append(c_cnt)
             data['avg_value'].append(c_mean)
             data['avg_std'].append(c_std)
             data['ttest_p'].append(p)
-
-            corr_coef, corr_p = ss.spearmanr(compare_vals, perfs_list)
             data['correlation_coef'].append(corr_coef)
             data['correlation_p'].append(corr_p)
 
