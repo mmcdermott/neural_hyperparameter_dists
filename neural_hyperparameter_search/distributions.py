@@ -3,6 +3,8 @@ from abc import ABC, abstractmethod
 import random, numpy as np
 from scipy.stats import poisson, uniform, beta, geom, dlaplace, rv_discrete, bernoulli
 
+# TODO(mmd): Add an rv descriptor.
+
 STATIC_TYPES = [
     type(None), bool, str, int, float, type(lambda:0)
 ] + list(set(np.typeDict.values()))
@@ -56,8 +58,8 @@ class MarkovianGenerativeProcess(Distribution):
         return generated_path
 
 class TransformedRV(Distribution):
-    def __init__(self, rv, fn): self.rv, self.fn = rv, fn
-    def _sample(self): return self.fn(self.rv.rvs(1))
+    def __init__(self, rv, fn, kwargs=True): self.rv, self.fn, self.kwargs = rv, fn, kwargs
+    def _sample(self): return self.fn(**(self.rv.rvs(1)[0])) if self.kwargs else self.fn(self.rv.rvs(1))
 
 def rv_int(rv): return TransformedRV(rv, int)
 
@@ -143,29 +145,15 @@ def build_mult_layer_fcr(
         return MixtureDistribution([cnsr(x) for x in opts])
     return layer_fn
 
-class LayerDistribution(Distribution):
-    # TODO(mmd): This is not good--probably should be some kind of generative process where the process can
-    # terminate...
-    def __init__(self, num_layer_distribution, layer_distribution_fn):
-        self.num_layer_distribution = num_layer_distribution
-        self.layer_distribution_fn = layer_distribution_fn
-
-    def _sample(self):
-        n = self.num_layer_distribution.rvs(1)[0]
-        assert n >= 0, "Invalid number of layers sampled!"
-
-        if n == 0: return []
-
-        layers = [self.layer_distribution_fn(None, 0).rvs(1)[0]]
-        for layer in range(1, n): layers.append(self.layer_distribution_fn(layers[-1], layer).rvs(1)[0])
-
-        return layers
-
 class DeltaDistribution(Distribution):
     def __init__(self, loc=0):
         self.x = loc
 
     def _sample(self): return self.x
+
+class SubsetDistribution(Distribution):
+    def __init__(self, superset, p_inc): self.superset, self.p_inc = superset, p_inc
+    def _sample(self): return [x for x in self.superset if Coin(self.p_inc).rvs(1)[0]]
 
 class Coin(Distribution):
     def __init__(self, prob_true=0.5): self.true_rv = bernoulli(prob_true)

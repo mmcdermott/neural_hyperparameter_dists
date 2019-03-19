@@ -1,5 +1,7 @@
 import os, random, hashlib, pickle, numpy as np, pandas as pd
 
+from .distributions import DictDistribution
+
 HYPERPARAMETERS_FILENAME = 'hyperparameters.pkl'
 LOCAL_RESULTS_FILENAME   = 'results.pkl'
 GLOBAL_RESULTS_FILENAME  = 'results.hdf'
@@ -8,10 +10,39 @@ SPLIT                    = 'Split Number'
 
 SPLIT_FN_TMPL            = 'split_%d'
 
-def __sample_dict(d): return {k: v.rvs(1) for k, v in d.items()}
+# TODO(mmd): Add 'split respects'
+def make_cv_indices(
+    pd_idx,
+    K,
+    return_integral_indices=False,
+    shuffle=True,
+):
+    """
+    Returns a list of K folds, each a tuple of (train_idx, tuning_eval_idx, held_out_eval_idx), where idx
+    is either directly in pd_idx space or in integral_idx space if return_integral_indices
+    """
+
+    N = len(pd_idx)
+
+    base_idx = np.arange(N) if return_integral_indices else pd_idx.values
+    if shuffle: base_idx = np.random.permutation(base_idx)
+
+    fold_indices = np.array_split(base_idx, K)
+    CV_splits = []
+    for i in range(K):
+        tuning_eval_fold = i
+        held_out_eval_fold = (i+1) % K
+        train_folds = [j for j in range(K) if j not in [tuning_eval_fold, held_out_eval_fold]]
+        CV_splits.append((
+            np.concatenate([fold_indices[j] for j in train_folds]), 
+            fold_indices[tuning_eval_fold],
+            fold_indices[held_out_eval_fold]
+        ))
+
+    return CV_splits
 
 def sample(num_sample, hyperparameter_dists):
-    if type(hyperparameter_dists) is dict: return __sample_dict(hyperparameter_dists)
+    if type(hyperparameter_dists) is dict: return DictDistribution(hyperparameter_dists).rvs(1)[0]
     elif type(hyperparameter_dists) in [list, tuple]: return hyperparameter_dists[num_sample]
 
     # TODO(mmd): copy from other work
@@ -28,6 +59,7 @@ def run_CV(
     CV_splits,
     hyperparameter_dists,
     model_cnstr,
+    evaluators,
     num_samples,
     seed,
     root_dir,
@@ -38,8 +70,11 @@ def run_CV(
     np.random.seed(seed)
     random.seed(seed)
 
+    if type(evaluators) is not dict: evaluators = {'eval': evaluators}
+
     index, data = [], {'train_score': [], 'local_score': [], 'held_out_score': []}
     results_filepath = os.path.join(root_dir, global_results_fn)
+    assert results_filepath.endswith('.hdf'), "Only supports h5 files at this stage."
 
     def update_results_df(old_results_df, index, data):
         new_results_df = pd.DataFrame(data, index=pd.MultiIndex.from_tuples(index, names=[PARAMS, SPLIT]))
@@ -69,20 +104,31 @@ def run_CV(
             print('Starting on split %d' % split_num)
 
             split_dir = os.path.join(setting_dir, SPLIT_FN_TMPL % split_num)
+            if not os.path.isdir(split_dir): os.mkdir(split_dir)
 
             try:
                 M = model_cnstr(checkpoint_dir=split_dir, **hyperparameters) # TODO(mmd): filename?
 
                 train, local_eval, held_out_eval =  dfs
-                M.train(train)
 
-                results = [M.evaluate(x) for x in dfs]
+                if type(train) is tuple: M.fit(*train)
+                elif type(train) is dict: M.fit(**train)
+                else: M.fit(train)
+
+                results = {
+                    eval_name: [
+                        (
+                            evaluator.score(model=M, **x) if type(x) is dict else evaluator.score(M, x)
+                        ) for x in dfs
+                    ] for eval_name, evaluator in evaluators.items()
+                }
                 # TODO(mmd): maybe make dictionaries?
                 with open(os.path.join(split_dir, local_results_fn), mode='wb') as f: pickle.dump(results, f)
                 train_result, local_result, held_out_result = results
             except Exception as e:
                 # TODO(mmd): Store more information--stack trace...
                 print("Exception!", num_sample, split_num, hyperparameters, e)
+                raise
 
                 with open(os.path.join(split_dir, 'errors.pkl'), mode='wb') as f: pickle.dump(e, f)
 
