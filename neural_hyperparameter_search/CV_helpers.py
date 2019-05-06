@@ -48,10 +48,18 @@ def sample(num_sample, hyperparameter_dists):
     # TODO(mmd): copy from other work
     raise NotImplementedError
 
-def __hash_dict(d):
-    H = hashlib.new('md4')
-    H.update(repr(sorted(d.items())).encode('utf-8'))
-    return H.hexdigest()
+
+def __nested_sorted_repr(c):
+    if type(c) is set: return tuple(sorted(c))
+    if type(c) is dict: return tuple(sorted([(k, __nested_sorted_repr(v)) for k, v in c.items()]))
+    if type(c) in (tuple, list): return tuple([__nested_sorted_repr(e) for e in c])
+    else: return c
+
+def hash_dict(d): return hash_repr(__nested_sorted_repr(d))
+def hash_repr(tup):
+    m = hashlib.new('md5')
+    m.update(repr(tup).encode('utf-8'))
+    return m.hexdigest()
 
 # TODO(mmd): Function to back out results df from split directories.
 
